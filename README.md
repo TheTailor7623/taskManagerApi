@@ -23,13 +23,15 @@
             - One to one (a task can only have one user)
 
 - Endpoints
+    - Root
+        - Displays the API endpoints available for use
     - User authentication
         - Methods
-            1. POST (register)
-            2. POST (LOGIN)
+            1. POST api/register (register)
+            2. POST api/login (LOGIN)
     - Task management
         - Methods
-            1. POST
-            2. GET
-            3. PUT
-            4. DELETE
+            1. POST api/tasks (create a new task and list tasks for the logged in user)
+            2. GET api/tasks/id (retirieve a task by its id)
+            3. PUT api/tasks/id (update a task by its id)
+            4. DELETE api/tasks/id (delete a task by its id)
