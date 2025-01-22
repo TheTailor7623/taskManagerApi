@@ -25,16 +25,30 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     """This is my custom user model"""
-    email = models.EmailField(max_length=255)
+    email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=50)
     surname = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    objects = UserManager()  # Connect to the custom manager
+    objects = UserManager()
 
-    USERNAME_FIELD = 'email'  # Login field
-    REQUIRED_FIELDS = ['name', 'surname']  # Required fields when creating a user
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name', 'surname']
 
     def __str__(self):
+        """Return string representaion of our user"""
         return self.email
+
+
+class Task(models.Model):
+    """Task model for managing user tasks"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    completed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
