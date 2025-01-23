@@ -1,8 +1,10 @@
-# Task manager API
+# API practice project for improving productivity
+
+## Task manager API
 1. Django
 2. Django Rest
 
-## Plan for the API
+### Plan for the API
 - Models
     - User
         - Fields
@@ -35,3 +37,38 @@
             2. GET api/tasks/id (retirieve a task by its id)
             3. PUT api/tasks/id (update a task by its id)
             4. DELETE api/tasks/id (delete a task by its id)
+
+## Life management framework API
+1. Django
+2. Django Rest
+
+### Plan for the API
+- Models
+    - Areas
+    - Goals
+    - Projects
+    - Tasks
+    - Sub-tasks
+- Serializers
+    * Areas
+    * Goals
+    * Projects
+    * Tasks
+    * Sub-tasks
+- Views
+    * Areas
+    * Goals
+    * Projects
+    * Tasks
+    * Sub-tasks
+- Endpoints
+    * lifeManager/Areas
+    * lifeManager/Areas/area
+    * lifeManager/Goals
+    * lifeManager/Goals/goal
+    * lifeManager/Projects
+    * lifeManager/Projects/project
+    * lifeManager/Tasks
+    * lifeManager/Tasks/task
+    * lifeManager/Sub-tasks
+    * lifeManager/Sub-tasks/sub-task
