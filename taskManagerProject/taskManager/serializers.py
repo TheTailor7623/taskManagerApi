@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from taskManager import models
 
-class ApiRegisterViewSerializer(serializers.ModelSerializer):
+class ApiRegisterSerializer(serializers.ModelSerializer):
     """Serializes registration fields for users to be able to register"""
     class Meta:
         model = models.User
@@ -32,3 +32,10 @@ class ApiRegisterViewSerializer(serializers.ModelSerializer):
             instance.set_password(password)
 
         return super().update(instance, validated_data)
+
+class ApiTaskSerializer(serializers.ModelSerializer):
+    """Serializes the task fields so user can input tasks"""
+    class Meta:
+        model = models.Task
+        fields = ['id', 'user', 'title', 'description', 'completed', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']

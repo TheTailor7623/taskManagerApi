@@ -40,7 +40,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         """Return string representaion of our user"""
         return self.email
 
-
 class Task(models.Model):
     """Task model for managing user tasks"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
