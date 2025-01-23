@@ -44,11 +44,14 @@
 
 ### Plan for the API
 - Models
-    - Areas
-    - Goals
-    - Projects
-    - Tasks
-    - Sub-tasks
+    * Areas
+        * Title (Name of the area)
+        * Description (description of the area)
+        * Milestones (list of milestones for the area)
+    * Goals
+    * Projects
+    * Tasks
+    * Sub-tasks
 - Serializers
     * Areas
     * Goals

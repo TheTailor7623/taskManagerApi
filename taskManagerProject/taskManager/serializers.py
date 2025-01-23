@@ -37,5 +37,5 @@ class ApiTaskSerializer(serializers.ModelSerializer):
     """Serializes the task fields so user can input tasks"""
     class Meta:
         model = models.Task
-        fields = ['id', 'user', 'title', 'description', 'completed', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
+        fields = ('id', 'user', 'title', 'description', 'completed', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'user', 'created_at', 'updated_at')

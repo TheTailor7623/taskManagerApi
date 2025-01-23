@@ -76,7 +76,6 @@ class ApiTaskView(APIView):
 
     def post(self, request, format=None):
         """Adds a task"""
-
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
