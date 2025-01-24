@@ -2,7 +2,7 @@ from django.urls import path, include
 from lifeManager import views
 
 urlpatterns = [
-    path("Dashboard/", views.Dashboard.as_view()),
+    path("", views.Dashboard.as_view()),
     path("Areas/", views.Areas.as_view()),
     path("Areas/<int:specificArea>/", views.AreasSpecific.as_view()),
     path("Goals/", views.Goals.as_view()),

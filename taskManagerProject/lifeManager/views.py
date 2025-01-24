@@ -61,21 +61,104 @@ class Areas(APIView):
 
 class AreasSpecific(APIView):
     """This is a view for specific areas allowing us to make changes or deleting"""
-    def get_object(self, request, format=None):
+
+    serializer_class = serializers.AreasSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication, )
+
+    def get_object(self, areaID):
         """This will allow us to display the different areas"""
-        pass
+        try:
+            return models.AreasModel.objects.get(id=areaID, user=self.request.user)
+        except models.AreasModel.DoesNotExist:
+            return None
 
-    def patch(self, request, format=None):
-        """This will allow us to change an area partially"""
-        pass
+    def get(self, request, specificArea, format=None):
+        """GET method to find a task"""
+        area = self.get_object(specificArea)
+        if not area:
+            return Response(
+                {
+                    "message":"Area not found",
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializers = self.serializer_class(area)
+        return Response(
+            {
+                "Area":serializers.data,
+            },
+            status=status.HTTP_200_OK
+        )
 
-    def put(self, request, format=None):
-        """This will allow us to change an area completely"""
-        pass
+    def put(self, request, specificArea, format=None):
+        """Updates area fully"""
+        try:
+            area = models.AreasModel.objects.get(id = specificArea, user=request.user)
+        except models.AreasModel.DoesNotExist:
+            return Response(
+                {
+                    "message":"Area not found or you do not have permission to update it",
+                },
+                status = status.HTTP_404_NOT_FOUND
+            )
+        serializers = self.serializer_class(area, data=request.data)
+        if serializers.is_valid():
+            serializers.save()
+            return Response(
+                {
+                    "message":"Area updated successfully",
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            serializers.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-    def delete(self, request, format=None):
+    def patch(self, request, specificArea, format=None):
+        """Updates area partially"""
+        try:
+            area = models.AreasModel.objects.get(id=specificArea, user=request.user)
+        except models.AreasModel.DoesNotExist:
+            return Response(
+                {
+                    "message":"Area not found or you do not have permission to update it",
+                },
+                status = status.HTTP_404_NOT_FOUND
+            )
+        serializers = self.serializer_class(area, data=request.data, partial = True)
+        if serializers.is_valid():
+            serializers.save()
+            return Response(
+                {
+                    "message":"Area updated successfully",
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            serializers.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    def delete(self, request, specificArea, format=None):
         """This will allow us to DELETE an area completely"""
-        pass
+        try:
+            area = models.AreasModel.objects.get(id=specificArea, user=request.user)
+        except models.AreasModel.DoesNotExist:
+            return Response(
+                {
+                    "message":"Area not found or you do not have permission to update it"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        area.delete()
+        return Response(
+            {
+                "message":"Area deleted successfully",
+            },
+            status=status.HTTP_200_OK
+        )
 
 class Goals(APIView):
     pass
