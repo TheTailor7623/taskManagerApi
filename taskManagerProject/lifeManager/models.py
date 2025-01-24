@@ -36,3 +36,24 @@ class ProjectsModel(models.Model):
     def __str__(self):
         """This shows what gets displayed in the shell"""
         return f"{self.title}"
+
+class TasksModel(models.Model):
+    """This is a model for projects"""
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    task=models.CharField(max_length=50)
+    description=models.CharField(max_length=50)
+    milestones=models.JSONField()
+
+    def __str__(self):
+        """This shows what gets displayed in the shell"""
+        return f"{self.title}"
+
+class SubtasksModel(models.Model):
+    """This is a model for projects"""
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    subtask=models.CharField(max_length=50)
+    description=models.CharField(max_length=50)
+
+    def __str__(self):
+        """This shows what gets displayed in the shell"""
+        return f"{self.title}"

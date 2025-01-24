@@ -20,7 +20,7 @@ class Dashboard(APIView):
                 "Goals:":"http://127.0.0.1:8000/lifeManager/Goals",
                 "Projects:":"http://127.0.0.1:8000/lifeManager/Projects",
                 "Tasks:":"http://127.0.0.1:8000/lifeManager/Tasks",
-                "Sub-tasks:":"http://127.0.0.1:8000/lifeManager/Sub-tasks",
+                "Sub-tasks:":"http://127.0.0.1:8000/lifeManager/Subtasks",
             }
         )
 
@@ -297,7 +297,7 @@ class Projects(APIView):
 
     def get(self, request, format=None):
         """This GET method will allows us to display all projects"""
-        projects =self.ProjectsModel.objects.filter(user=request.user)
+        projects = self.ProjectsModel.objects.filter(user=request.user)
         serializer = self.serializer_class(projects, many=True)
         return Response({
             "Message":"Here is all the projects found",
@@ -306,18 +306,383 @@ class Projects(APIView):
             status=status.HTTP_200_OK
         )
 
+    def post(self, request, format=None):
+        """This POST method will allow us to create projects"""
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(
+                {
+                    "Message":"The project was created successfully",
+                    "Project details:":serializer.data,
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
 
 class ProjectsSpecific(APIView):
-    pass
+    """This will allow us to use update or delete methods on specific projects"""
+    serializer_class = serializers.ProjectsSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication, )
+    ProjectsModel = models.ProjectsModel
+
+    def get(self, request, specificProject, format=None):
+        """This GET method allows us to display the specific project"""
+        try:
+            project = self.ProjectsModel.objects.get(id=specificProject, user=request.user)
+        except self.ProjectsModel.DoesNotExist:
+            return Response(
+                {
+                    "Message":"Project was not found or you do not have permission to edit such a goal",
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = self.serializer_class(project)
+        return Response(
+            {
+                "Here is the project":serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
+
+    def put(self, request, specificProject, format=None):
+        """This PUT method allows us to make changes to a specific project"""
+        try:
+            project = self.ProjectsModel.objects.get(id=specificProject, user=request.user)
+        except self.ProjectsModel.DoesNotExist:
+            return Response(
+                {
+                    "Message":"Project was not found or you do not have permission to edit such a goal",
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = self.serializer_class(project, data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(
+                {
+                    "Message":"Project updated",
+                    "Updated project":serializer.data,
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    def patch(self, request, specificProject, format=None):
+        """This PATCH method allows us to make partial changes to a specific project"""
+        try:
+            project = self.ProjectsModel.objects.get(id=specificProject, user=request.user)
+        except self.ProjectsModel.DoesNotExist:
+            return Response(
+                {
+                    "Message":"Project was not found or you do not have permission to edit such a goal",
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = self.serializer_class(project, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(
+                {
+                    "Message":"Project updated successfully",
+                    "Updated project:":serializer.data,
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    def delete(self, request, specificProject, format=None):
+        """This DELETE method allows us to delete a specific project"""
+        try:
+            project = self.ProjectsModel.objects.get(id=specificProject, user=request.user)
+        except self.ProjectsModel.DoesNotExist:
+            return Response(
+                {
+                    "Message":"Project was not found or you do not have the permission to delete such a project",
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        project.delete()
+        return Response(
+            {
+                "Message":"Project deleted successfully"
+            },
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 class Tasks(APIView):
-    pass
+    """This view will handle the tasks for this feature in the API"""
+    serializer_class = serializers.TasksSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication, )
+    TasksModel = models.TasksModel
+
+    def get(self, request, format=None):
+        """This GET mothod allows us to visualise tasks"""
+        task = self.TasksModel.objects.filter(user = request.user)
+        serializer = self.serializer_class(task, many=True)
+        return Response(
+            {
+                "Message:":"Here are the tasks we found...",
+                "Tasks:":serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
+
+    def post(self, request, format=None):
+        """This POST method allows us to create tasks"""
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(
+                {
+                    "Message":"Task has been added successfully",
+                    "Task:":serializer.data,
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 class TasksSpecific(APIView):
-    pass
+    """This will allow us to use update or delete methods on specific tasks"""
+    serializer_class = serializers.TasksSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication, )
+    TasksModel = models.TasksModel
+
+    def get(self, request, specificTask, format=None):
+        """This GET method allows us to display the specific project"""
+        try:
+            task = self.TasksModel.objects.get(id=specificTask, user=request.user)
+        except self.TasksModel.DoesNotExist:
+            return Response(
+                {
+                    "Message":"Task was not found or you do not have permission to edit such a goal",
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = self.serializer_class(task)
+        return Response(
+            {
+                "Here is the project":serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
+
+    def put(self, request, specificTask, format=None):
+        """This PUT method allows us to make changes to a specific project"""
+        try:
+            task = self.TasksModel.objects.get(id=specificTask, user=request.user)
+        except self.TasksModel.DoesNotExist:
+            return Response(
+                {
+                    "Message":"Task was not found or you do not have permission to edit such a goal",
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = self.serializer_class(task, data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(
+                {
+                    "Message":"Task updated",
+                    "Updated task":serializer.data,
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    def patch(self, request, specificTask, format=None):
+        """This PATCH method allows us to make partial changes to a specific task"""
+        try:
+            task = self.TasksModel.objects.get(id=specificTask, user=request.user)
+        except self.TasksModel.DoesNotExist:
+            return Response(
+                {
+                    "Message":"Task was not found or you do not have permission to edit such a task",
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = self.serializer_class(task, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(
+                {
+                    "Message":"Task updated successfully",
+                    "Updated task:":serializer.data,
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    def delete(self, request, specificTask, format=None):
+        """This DELETE method allows us to delete a specific task"""
+        try:
+            project = self.TasksModel.objects.get(id=specificTask, user=request.user)
+        except self.TasksModel.DoesNotExist:
+            return Response(
+                {
+                    "Message":"Task was not found or you do not have the permission to delete such a task",
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        project.delete()
+        return Response(
+            {
+                "Message":"Task deleted successfully"
+            },
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 class Subtasks(APIView):
-    pass
+    """This view will handle the subtasks for this feature in the API"""
+    serializer_class = serializers.SubtasksSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication, )
+    SubtasksModel = models.SubtasksModel
+
+    def get(self, request, format=None):
+        """This GET mothod allows us to visualise tasks"""
+        subTask = self.SubtasksModel.objects.filter(user = request.user)
+        serializer = self.serializer_class(subTask, many=True)
+        return Response(
+            {
+                "Message:":"Here are the subtasks we found...",
+                "Subtask:":serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
+
+    def post(self, request, format=None):
+        """This POST method allows us to create tasks"""
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(
+                {
+                    "Message":"Task has been added successfully",
+                    "Task:":serializer.data,
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 class SubtasksSpecific(APIView):
-    pass
+    """This will allow us to use update or delete methods on specific tasks"""
+    serializer_class = serializers.SubtasksSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication, )
+    SubtasksModel = models.SubtasksModel
+
+    def get(self, request, specificSubTask, format=None):
+        """This GET method allows us to display the specific subtask"""
+        try:
+            subTask = self.SubtasksModel.objects.get(id=specificSubTask, user=request.user)
+        except self.SubtasksModel.DoesNotExist:
+            return Response(
+                {
+                    "Message":"Subtask was not found or you do not have permission to edit such a subtask",
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = self.serializer_class(subTask)
+        return Response(
+            {
+                "Here is the subtask":serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
+
+    def put(self, request, specificSubTask, format=None):
+        """This PUT method allows us to make changes to a specific subtask"""
+        try:
+            task = self.SubtasksModel.objects.get(id=specificSubTask, user=request.user)
+        except self.SubtasksModel.DoesNotExist:
+            return Response(
+                {
+                    "Message":"Subtask was not found or you do not have permission to edit such a goal",
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = self.serializer_class(task, data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(
+                {
+                    "Message":"Subtask updated",
+                    "Updated subtask":serializer.data,
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    def patch(self, request, specificSubTask, format=None):
+        """This PATCH method allows us to make partial changes to a specific subtask"""
+        try:
+            task = self.SubtasksModel.objects.get(id=specificSubTask, user=request.user)
+        except self.SubtasksModel.DoesNotExist:
+            return Response(
+                {
+                    "Message":"Subtask was not found or you do not have permission to edit such a subtask",
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = self.serializer_class(task, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(
+                {
+                    "Message":"Subtask updated successfully",
+                    "Updated subtask:":serializer.data,
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    def delete(self, request, specificSubTask, format=None):
+        """This DELETE method allows us to delete a specific subtask"""
+        try:
+            project = self.SubtasksModel.objects.get(id=specificSubTask, user=request.user)
+        except self.SubtasksModel.DoesNotExist:
+            return Response(
+                {
+                    "Message":"Subtask was not found or you do not have the permission to delete such a subtask",
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        project.delete()
+        return Response(
+            {
+                "Message":"Subtask deleted successfully"
+            },
+            status=status.HTTP_204_NO_CONTENT
+        )
