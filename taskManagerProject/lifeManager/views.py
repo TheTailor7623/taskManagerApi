@@ -36,7 +36,7 @@ class Areas(APIView):
         serializer = serializers.AreasSerializer(areas, many=True)
         return Response(
             serializer.data,
-            status=status.HTTP_302_FOUND
+            status=status.HTTP_200_OK
         )
 
     def post(self, request, format=None):
@@ -161,10 +161,92 @@ class AreasSpecific(APIView):
         )
 
 class Goals(APIView):
-    pass
+    """This view is for the goals API feature"""
+    serializer_class = serializers.GoalsSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication, )
+
+    def get(self, request, format=None):
+        """This will allow us to display the different goals"""
+        goals = models.GoalsModel.objects.filter(user=request.user)
+        serializer = self.serializer_class(goals, many=True)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    def post(self, request, format=None):
+        """This will allow us to create goals"""
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(
+                {
+                    "Message":"Goal created successfully"
+                },
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 class GoalsSpecific(APIView):
-    pass
+    """This will allow the user to update and delete a goal"""
+    serializer_class = serializers.GoalsSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication, )
+
+    GoalsModel = models.GoalsModel
+
+    def get(self, request, specificGoal, format=None):
+        """This GET method will allow us to view the specific goal"""
+        try:
+            goal = self.GoalsModel.objects.get(id=specificGoal, user=request.user)
+            serializer = self.serializer_class(goal)
+        except self.GoalsModel.DoesNotExist:
+           return Response(
+                {
+                    "message":"Goal not found or you do not have permission to update it"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        return Response(
+            {
+                "Message":"Here is your goal",
+                "Goal":serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
+
+    def put(self, request, specificGoal, format=None):
+        """This PUT method will allow us to make a complete change to a specific goal"""
+        try:
+            goal = self.GoalsModel.get(id=specificGoal, user=request.user)
+        except self.GoalsModel.DoesNotExist:
+            return Response(
+                {
+                    "message":"Goal not found or you do not have permission to update it"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = self.serializer_class(goal, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK,
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    def patch(self, request, specificGoal, format=None):
+        pass
+
+    def delete(self, request, specificGoal, format=None):
+        pass
 
 class Projects(APIView):
     pass
