@@ -222,7 +222,7 @@ class GoalsSpecific(APIView):
     def put(self, request, specificGoal, format=None):
         """This PUT method will allow us to make a complete change to a specific goal"""
         try:
-            goal = self.GoalsModel.get(id=specificGoal, user=request.user)
+            goal = self.GoalsModel.objects.get(id=specificGoal, user=request.user)
         except self.GoalsModel.DoesNotExist:
             return Response(
                 {
@@ -243,13 +243,69 @@ class GoalsSpecific(APIView):
         )
 
     def patch(self, request, specificGoal, format=None):
-        pass
+        """This PATCH method will allows us to make partial changes to a goal"""
+        try:
+            goal = self.GoalsModel.objects.get(id=specificGoal, user=request.user)
+        except self.GoalsModel.DoesNotExist:
+            return Response(
+                {
+                    "Message":"Goals was not found or you do not have permission to edit such a goal",
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = self.serializer_class(goal, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {
+                    "Message":"Goal updated successfully",
+                    "Data":serializer.data,
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
 
     def delete(self, request, specificGoal, format=None):
-        pass
+        """This DELETE method will allow us to delete a goal"""
+        try:
+            goal = self.GoalsModel.objects.get(id=specificGoal, user=request.user)
+        except self.GoalsModel.DoesNotExist:
+            return Response(
+                {
+                    "Message":"Goals was not found or you do not have permission to edit such a goal",
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        goal.delete()
+        return Response(
+            {
+                "Message":"Goal deleted successfully"
+            },
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 class Projects(APIView):
-    pass
+    """This Projects class will allow us to make GET and POST requests for the projects API feature"""
+    serializer_class = serializers.ProjectsSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication, )
+    ProjectsModel = models.ProjectsModel
+
+    def get(self, request, format=None):
+        """This GET method will allows us to display all projects"""
+        projects =self.ProjectsModel.objects.filter(user=request.user)
+        serializer = self.serializer_class(projects, many=True)
+        return Response({
+            "Message":"Here is all the projects found",
+            "Projects:":serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
+
 
 class ProjectsSpecific(APIView):
     pass

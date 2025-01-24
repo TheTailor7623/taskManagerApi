@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseU
 
 # Create your models here.
 class AreasModel(models.Model):
-    """This is a model for the areas"""
+    """This is a model for areas"""
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     title=models.CharField(max_length=50)
     description=models.CharField(max_length=50)
@@ -16,7 +16,18 @@ class AreasModel(models.Model):
         return f"{self.title}"
 
 class GoalsModel(models.Model):
-    """This is a model for the goals"""
+    """This is a model for goals"""
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    title=models.CharField(max_length=50)
+    description=models.CharField(max_length=50)
+    milestones=models.JSONField()
+
+    def __str__(self):
+        """This shows what gets displayed in the shell"""
+        return f"{self.title}"
+
+class ProjectsModel(models.Model):
+    """This is a model for projects"""
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     title=models.CharField(max_length=50)
     description=models.CharField(max_length=50)
