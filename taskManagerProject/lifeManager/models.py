@@ -46,7 +46,7 @@ class TasksModel(models.Model):
 
     def __str__(self):
         """This shows what gets displayed in the shell"""
-        return f"{self.title}"
+        return f"{self.task}"
 
 class SubtasksModel(models.Model):
     """This is a model for projects"""
@@ -56,4 +56,4 @@ class SubtasksModel(models.Model):
 
     def __str__(self):
         """This shows what gets displayed in the shell"""
-        return f"{self.title}"
+        return f"{self.subtask}"
